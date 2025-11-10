@@ -84,6 +84,12 @@ export default function Home() {
         </div>
 
       </section>
+
+      <div className="flex justify-center mt-10">
+        <button className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition">
+          Predict
+        </button>
+      </div>
     </main>
   );
 }
