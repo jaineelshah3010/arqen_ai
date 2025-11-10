@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Montserrat, Quicksand, Raleway, Hubot_Sans, Red_Hat_Display, Unbounded } from 'next/font/google'
@@ -28,6 +29,30 @@ const quicksand = Quicksand({
 
 
 export default function Home() {
+  const [prediction, setPrediction] = useState<string | null>(null);
+  const handlePredict = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ARQEN_API}/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_size: 12000,
+          floors: 10,
+          region_code: 2,
+          complexity: 0.7,
+          duration_months: 14,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to fetch prediction");
+      const data = await response.json();
+      setPrediction(data.predicted_cost_usd_million);
+      console.log("API URL:", process.env.NEXT_PUBLIC_ARQEN_API);
+    } catch (error) {
+      console.error(error);
+      setPrediction("Error fetching prediction");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-white">
       <header className={`flex grid-row gap-20 items-center justify-between `}>
@@ -85,10 +110,18 @@ export default function Home() {
 
       </section>
 
-      <div className="flex justify-center mt-10">
-        <button className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition">
+      <div className="flex flex-col items-center mt-10">
+        <button
+          onClick={handlePredict}
+          className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+        >
           Predict
         </button>
+        {prediction && (
+          <p className="mt-4 text-black text-sm">
+            Predicted Cost: {prediction === "Error fetching prediction" ? prediction : `$${prediction} million`}
+          </p>
+        )}
       </div>
     </main>
   );
